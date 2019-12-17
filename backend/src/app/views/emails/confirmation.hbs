@@ -1,0 +1,36 @@
+<tr>
+	{{>welcome_header}}
+</tr>
+<tr>
+	<td bgcolor="#ffffff">
+		<table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td style="color: #153643; font-family: Arial, sans-serif; font-size: 24px; padding: 20px 0 30px 0;">
+					<strong>Olá, {{ name }}</strong>
+				</td>
+			</tr>
+			<tr>
+				<td style="color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 22px;">
+					<p>Welcome to Gym Point! 
+					<br />
+					Your enrollment was made successfully.</p>
+				</td>
+			</tr>
+			<tr>
+				<td style="color: #153643; font-family: Arial, sans-serif; font-size: 22px; line-height: 20px; padding: 20px 0 30px 0;">
+					<img src="cid:enroll" alt="enroll" width="100" style="display: block;" align="left" />
+
+					<strong>Plan: </strong> {{plan}} <br />
+					<strong>End date: </strong> {{end_date}} <br />
+					<strong>Plan price: </strong> {{price}} <br />
+					<strong>Total: </strong> {{price_total}} <br />
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor="#ee4c50">
+		{{> footer}}
+	</td>
+</tr>
