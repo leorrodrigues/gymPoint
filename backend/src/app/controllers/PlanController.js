@@ -2,73 +2,78 @@ import * as Yup from 'yup';
 import Plan from '../models/Plan';
 
 class PlanController {
-    async index(req, res) {
-        const { page = 1, per_page = 10 } = req.query;
+	async index(req, res) {
+		const { page = 1, per_page = 10 } = req.query;
 
-        const plans = await Plan.findAll({
-            limit: per_page,
-            offset: (page - 1) * per_page,
-            order: ['id'],
-        });
-        return res.json(plans);
-    }
+		if (req.query.id !== undefined) {
+			const plan = await Plan.findByPk(req.query.id);
+			return res.json(plan);
+		}
 
-    async store(req, res) {
-        const schema = Yup.object().shape({
-            title: Yup.string().required(),
-            duration: Yup.number().required(),
-            price: Yup.number().required(),
-        });
+		const plans = await Plan.findAll({
+			limit: per_page,
+			offset: (page - 1) * per_page,
+			order: ['id'],
+		});
+		return res.json(plans);
+	}
 
-        if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: 'Validation fails' });
-        }
+	async store(req, res) {
+		const schema = Yup.object().shape({
+			title: Yup.string().required(),
+			duration: Yup.number().required(),
+			price: Yup.number().required(),
+		});
 
-        const plan = await Plan.findOne({ where: { title: req.body.title } });
+		if (!(await schema.isValid(req.body))) {
+			return res.status(400).json({ error: 'Validation fails' });
+		}
 
-        if (plan) {
-            return res
-                .status(400)
-                .json({ error: 'Already exists a plan with this title' });
-        }
+		const plan = await Plan.findOne({ where: { title: req.body.title } });
 
-        const { title, duration, price } = await Plan.create(req.body);
+		if (plan) {
+			return res
+				.status(400)
+				.json({ error: 'Already exists a plan with this title' });
+		}
 
-        return res.json({ title, duration, price });
-    }
+		const { title, duration, price } = await Plan.create(req.body);
 
-    async update(req, res) {
-        const schema = Yup.object().shape({
-            title: Yup.string(),
-            duration: Yup.number(),
-            price: Yup.number(),
-        });
+		return res.json({ title, duration, price });
+	}
 
-        if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: 'Validation fails' });
-        }
+	async update(req, res) {
+		const schema = Yup.object().shape({
+			title: Yup.string(),
+			duration: Yup.number(),
+			price: Yup.number(),
+		});
 
-        const plan = await Plan.findByPk(req.params.id);
+		if (!(await schema.isValid(req.body))) {
+			return res.status(400).json({ error: 'Validation fails' });
+		}
 
-        if (!plan) {
-            return res.status(400).json({ error: 'Invalid plan title' });
-        }
+		const plan = await Plan.findByPk(req.params.id);
 
-        const { title, duration, price } = await plan.update(req.body);
+		if (!plan) {
+			return res.status(400).json({ error: 'Invalid plan title' });
+		}
 
-        return res.json({ title, duration, price });
-    }
+		const { title, duration, price } = await plan.update(req.body);
 
-    async delete(req, res) {
-        const plan = await Plan.findByPk(req.params.id);
+		return res.json({ title, duration, price });
+	}
 
-        if (!plan) {
-            return res.status(400).json({ error: 'Invalid plan' });
-        }
-        Plan.destroy({ where: { id: plan.id } });
+	async delete(req, res) {
+		const plan = await Plan.findByPk(req.params.id);
 
-        return res.json();
-    }
+		if (!plan) {
+			return res.status(400).json({ error: 'Invalid plan' });
+		}
+		Plan.destroy({ where: { id: plan.id } });
+
+		return res.json();
+	}
 }
 
 export default new PlanController();

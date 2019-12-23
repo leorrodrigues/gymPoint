@@ -31,7 +31,7 @@ module.exports = {
 			},
 		],
 		'import/prefer-default-export': 'off',
-		'no-unused-vars': ['error', {argsIgnorePattern: '^_'}],
+		'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
 		'react/jsx-one-expression-per-line': 'off',
 		'global-require': 'off',
 		'react/jsx-props-no-spreading': 'off',
@@ -39,9 +39,10 @@ module.exports = {
 		'no-param-reassign': 'off',
 		'no-underscore-dangle': 'off',
 		camelcase: 'off',
-		'no-console': ['error', {allow: ['tron']}],
+		'no-console': ['error', { allow: ['tron'] }],
 		'react-hooks/rules-of-hooks': 'error',
 		'react-hooks/exhaustive-deps': 'warn',
+		'react/prop-types': ['error', { ignore: ['navigation'] }],
 	},
 	settings: {
 		'import/resolver': {

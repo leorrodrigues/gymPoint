@@ -9,140 +9,142 @@ import confirmationEnrollMail from '../jobs/confirmationEnroll';
 import Queue from '../../lib/Queue';
 
 class EnrollmentController {
-    async index(req, res) {
-        const { page = 1, per_page = 10 } = req.query;
+	async index(req, res) {
+		const { page = 1, per_page = 10 } = req.query;
 
-        const enrollments = await Enrollment.findAll({
-            limit: per_page,
-            offset: (page - 1) * per_page,
-            order: ['id'],
-        });
+		if (
+			req.query.student_id !== undefined &&
+			req.query.plan_id !== undefined
+		) {
+			const enroll = await Enrollment.findOne({
+				where: {
+					student_id: req.query.student_id,
+					plan_id: req.query.plan_id,
+				},
+			});
+			return res.json(enroll);
+		}
 
-        if (!enrollments) {
-            return res
-                .status(400)
-                .json({ error: "Don't exists any enrollment" });
-        }
+		const enrollments = await Enrollment.findAll({
+			limit: per_page,
+			offset: (page - 1) * per_page,
+			order: ['student_id'],
+		});
 
-        return res.json(enrollments);
-    }
+		if (!enrollments) {
+			return res
+				.status(400)
+				.json({ error: "Don't exists any enrollment" });
+		}
 
-    async store(req, res) {
-        const schema = Yup.object().shape({
-            student_id: Yup.number().required(),
-            plan_id: Yup.number().required(),
-            start_date: Yup.date().required(),
-        });
+		return res.json(enrollments);
+	}
 
-        if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: 'Validation fails' });
-        }
+	async store(req, res) {
+		const schema = Yup.object().shape({
+			student_id: Yup.number().required(),
+			plan_id: Yup.number().required(),
+			start_date: Yup.date().required(),
+		});
 
-        const { student_id, plan_id, start_date } = req.body;
+		if (!(await schema.isValid(req.body))) {
+			return res.status(400).json({ error: 'Validation fails' });
+		}
 
-        const plan = await Plan.findByPk(plan_id);
+		const { student_id, plan_id, start_date } = req.body;
 
-        if (!plan) {
-            return res.status(400).json({ error: 'Invalid plan' });
-        }
+		const plan = await Plan.findByPk(plan_id);
 
-        const student = await Student.findByPk(student_id);
+		if (!plan) {
+			return res.status(400).json({ error: 'Invalid plan' });
+		}
 
-        if (!student) {
-            return res.status(400).json({ error: 'Invalid student' });
-        }
+		const student = await Student.findByPk(student_id);
 
-        const e = await Enrollment.findOne({
-            where: { student_id: student.id, plan_id: plan.id },
-        });
+		if (!student) {
+			return res.status(400).json({ error: 'Invalid student' });
+		}
 
-        if (e) {
-            return res
-                .status(400)
-                .json({ error: 'The student already has this plan' });
-        }
+		// const e = await Enrollment.findOne({
+		// 	where: { student_id: student.id, plan_id: plan.id },
+		// });
 
-        const end_date = await addMonths(parseISO(start_date), plan.duration);
-        const total_price = plan.price * plan.duration;
+		// if (e) {
+		// 	return res
+		// 		.status(400)
+		// 		.json({ error: 'The student already has this plan' });
+		// }
 
-        const enrollment = await Enrollment.create({
-            student_id,
-            plan_id,
-            start_date,
-            end_date,
-            price: total_price,
-        });
+		const end_date = await addMonths(parseISO(start_date), plan.duration);
+		const total_price = plan.price * plan.duration;
 
-        const confirmation = {
-            total_price,
-            end_date,
-            student_name: student.name,
-            student_email: student.email,
-            plan_title: plan.title,
-            plan_price: plan.price,
-        };
+		const enrollment = await Enrollment.create({
+			student_id,
+			plan_id,
+			start_date,
+			end_date,
+			price: total_price,
+		});
 
-        await Queue.add(confirmationEnrollMail.key, {
-            confirmation,
-        });
+		const confirmation = {
+			total_price,
+			end_date,
+			student_name: student.name,
+			student_email: student.email,
+			plan_title: plan.title,
+			plan_price: plan.price,
+		};
 
-        return res.json(enrollment);
-    }
+		await Queue.add(confirmationEnrollMail.key, {
+			confirmation,
+		});
 
-    async update(req, res) {
-        const schema = Yup.object().shape({
-            student_id: Yup.number().required(),
-            plan_id: Yup.number().required(),
-            start_date: Yup.date().required(),
-        });
+		return res.json(enrollment);
+	}
 
-        if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: 'Validation fails' });
-        }
+	async update(req, res) {
+		const schema = Yup.object().shape({
+			start_date: Yup.date().required(),
+		});
 
-        const enroll = await Enrollment.findOne({
-            where: {
-                student_id: req.body.student_id,
-                plan_id: req.body.plan_id,
-            },
-        });
+		const { student_id, plan_id } = req.params;
 
-        if (!enroll) {
-            return res.statud(400).json({ error: 'Invalid plan or student' });
-        }
+		if (!(await schema.isValid(req.body))) {
+			return res.status(400).json({ error: 'Validation fails' });
+		}
 
-        const { student_id, plan_id, start_date } = await enroll.update(
-            req.body
-        );
+		const enroll = await Enrollment.findOne({
+			where: {
+				student_id,
+				plan_id,
+			},
+		});
 
-        return res.json({ student_id, plan_id, start_date });
-    }
+		if (!enroll) {
+			return res.statud(400).json({ error: 'Invalid plan or student' });
+		}
 
-    async delete(req, res) {
-        const schema = Yup.object().shape({
-            student_id: Yup.number().required(),
-            plan_id: Yup.number().required(),
-        });
+		const { start_date } = await enroll.update(req.body);
 
-        if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: 'Validation fails' });
-        }
+		return res.json({ student_id, plan_id, start_date });
+	}
 
-        const enroll = await Enrollment.findOne({
-            where: {
-                student_id: req.body.student_id,
-                plan_id: req.body.plan_id,
-            },
-        });
+	async delete(req, res) {
+		const enroll = await Enrollment.findOne({
+			where: {
+				student_id: req.params.student_id,
+				plan_id: req.params.plan_id,
+			},
+		});
 
-        if (!enroll) {
-            return res.status(400).json({ error: 'Invalid enrollment' });
-        }
+		if (!enroll) {
+			return res.status(400).json({ error: 'Invalid enrollment' });
+		}
 
-        enroll.destroy({ where: { id: enroll.id } });
+		enroll.destroy({ where: { id: enroll.id } });
 
-        return res.json();
-    }
+		return res.json();
+	}
 }
 
 export default new EnrollmentController();

@@ -6,77 +6,97 @@ import Queue from '../../lib/Queue';
 import answerdQuestion from '../jobs/answerdQuestion';
 
 class CheckinController {
-    async index(req, res) {
-        const { student_id } = req.params;
-        const { page = 1, per_page = 10 } = req.query;
+	async indexAll(req, res) {
+		const { page = 1, per_page = 10 } = req.query;
 
-        const orders = await HelpOrder.find({
-            student_id,
-        })
-            .limit(parseInt(per_page, 10))
-            .skip((parseInt(page, 10) - 1) * parseInt(per_page, 10));
-        return res.json(orders);
-    }
+		const orders = await HelpOrder.find({})
+			.limit(parseInt(per_page, 10))
+			.skip((parseInt(page, 10) - 1) * parseInt(per_page, 10));
 
-    async store(req, res) {
-        const schema = Yup.object().shape({
-            question: Yup.string().required(),
-        });
-        if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: 'Validation fails' });
-        }
+		return res.json(orders);
+	}
 
-        const { student_id } = req.params;
+	async index(req, res) {
+		const { student_id } = req.params;
+		const { page = 1, per_page = 10 } = req.query;
 
-        const student = await Student.findByPk(student_id);
-        if (!student) {
-            return res.status(400).json({ error: 'Invalid student' });
-        }
+		const orders = await HelpOrder.find({
+			student_id,
+		})
+			.limit(parseInt(per_page, 10))
+			.skip((parseInt(page, 10) - 1) * parseInt(per_page, 10));
+		return res.json(orders);
+	}
 
-        const help = await HelpOrder.create({
-            student_id,
-            question: req.body.question,
-            answer: null,
-            answer_at: null,
-        });
+	async store(req, res) {
+		const schema = Yup.object().shape({
+			question: Yup.string().required(),
+		});
+		if (!(await schema.isValid(req.body))) {
+			return res.status(400).json({ error: 'Validation fails' });
+		}
 
-        return res.json(help);
-    }
+		const { student_id } = req.params;
 
-    async update(req, res) {
-        const schema = Yup.object().shape({
-            answer: Yup.string().required(),
-        });
+		const student = await Student.findByPk(student_id);
+		if (!student) {
+			return res.status(400).json({ error: 'Invalid student' });
+		}
 
-        if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: 'Validation fails' });
-        }
+		const help = await HelpOrder.create({
+			student_id,
+			question: req.body.question,
+			answer: null,
+			answer_at: null,
+		});
 
-        const { student_id } = req.params;
-        const orders = await HelpOrder.find({ student_id, answer: null });
+		return res.json(help);
+	}
 
-        if (orders.length === 0) {
-            return res
-                .status(400)
-                .json({ error: 'Student without help orders' });
-        }
+	async update(req, res) {
+		const schema = Yup.object().shape({
+			answer: Yup.string().required(),
+			_id: Yup.string(),
+		});
 
-        let order = orders[0];
+		if (!(await schema.isValid(req.body))) {
+			return res.status(400).json({ error: 'Validation fails' });
+		}
 
-        order.answer = req.body.answer;
-        order.answer_at = new Date();
+		const { student_id } = req.params;
 
-        order = await order.save();
+		const { _id, answer } = req.body;
 
-        const { name, email } = await Student.findByPk(student_id);
+		let orders;
 
-        await Queue.add(answerdQuestion.key, {
-            order,
-            name,
-            email,
-        });
-        return res.json(order);
-    }
+		if (_id) {
+			orders = await HelpOrder.find({ _id });
+		} else {
+			orders = await HelpOrder.find({ student_id, answer: null });
+		}
+
+		if (orders.length === 0) {
+			return res
+				.status(400)
+				.json({ error: 'Student without help orders' });
+		}
+
+		let order = orders[0];
+
+		order.answer = answer;
+		order.answer_at = new Date();
+
+		order = await order.save();
+
+		const { name, email } = await Student.findByPk(student_id);
+
+		await Queue.add(answerdQuestion.key, {
+			order,
+			name,
+			email,
+		});
+		return res.json(order);
+	}
 }
 
 export default new CheckinController();
