@@ -138,29 +138,24 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
+-   Axios
 -   ExpressJS
--   MVC design pattern
 -   Sequelize ORM
+-   Mongoose
 -   Background mail sendling with Redis
--   Sentry
+-   Mail Trap
 -   Multer
 -   JWT
 -   Docker
--   React
--   React Hooks
--   ReactJS
--   React Native
+-   React / React Hooks / ReactJS / React Native
 -   Reactotron
 -   React Navigation / React Router DOM
 -   React Toastify
--   Redux
--   Redux Saga
--   Redux Persist
+-   Redux / Redux Saga / Redux Persist
 -   Flux Archtecture
 -   ESLint
 -   Prettier
 -   Styled Components
--   Unform
--   Axios
--   History
+-   Rocketseat/Unform
+-   .env
 -   Etc
