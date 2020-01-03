@@ -3,7 +3,7 @@
 </h1>
 
 <h2 align="center">
-Project made in Rockeatseat bootcamp. This project has a back-end, front-end and mobile applications for gyms and their students. It has a wide range of features, like admin login, plans, students enrollments, students help oders, etc.
+Project made in Rockeatseat bootcamp. This project has a back-end, front-end and mobile applications for gyms and their students. It has a wide range of features, like admin login, plans, students enrollments, students help orders, etc.
 </h3>
 
 <p align="center">
