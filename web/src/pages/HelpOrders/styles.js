@@ -93,15 +93,13 @@ export const ListQuestions = styled.div`
 	}
 `;
 
-export const AnswerButton = styled.div`
-	button {
-		border: none;
-		background: none;
-		color: #4d85ee;
+export const AnswerButton = styled.button`
+	border: none;
+	background: none;
+	color: #4d85ee;
 
-		&:hover {
-			color: ${darken(0.3, '#4d85ee')};
-		}
+	&:hover {
+		color: ${darken(0.3, '#4d85ee')};
 	}
 `;
 
@@ -186,5 +184,42 @@ export const AnswerModal = styled(Modal).attrs({
 				border-radius: 4px;
 			}
 		}
+	}
+`;
+
+export const Paginate = styled.div`
+	display: flex;
+
+	align-items: center;
+	justify-content: center;
+
+	padding: 15px;
+
+	font-weight: bold;
+`;
+
+export const PaginateButton = styled.button.attrs(props => ({
+	disabled:
+		(props.page === 1 && props.type === 'prev') ||
+		(props.type === 'next' && props.end === 'true'),
+}))`
+	margin: 20px;
+
+	color: #fff;
+	font-weight: bold;
+
+	background: #ee4d64;
+	width: 142px;
+	height: 36px;
+	border: 0;
+	border-radius: 4px;
+
+	&:hover {
+		color: ${darken(0.3, '#ee4d64')};
+	}
+
+	&[disabled] {
+		cursor: not-allowed;
+		opacity: 0.6;
 	}
 `;

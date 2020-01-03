@@ -21,11 +21,31 @@ class EnrollmentController {
 					student_id: req.query.student_id,
 					plan_id: req.query.plan_id,
 				},
+				include: [
+					{
+						model: Student,
+						attributes: ['name'],
+					},
+					{
+						model: Plan,
+						attributes: ['title', 'duration', 'price'],
+					},
+				],
 			});
 			return res.json(enroll);
 		}
 
 		const enrollments = await Enrollment.findAll({
+			include: [
+				{
+					model: Student,
+					attributes: ['name'],
+				},
+				{
+					model: Plan,
+					attributes: ['title', 'duration', 'price'],
+				},
+			],
 			limit: per_page,
 			offset: (page - 1) * per_page,
 			order: ['student_id'],
@@ -64,16 +84,6 @@ class EnrollmentController {
 		if (!student) {
 			return res.status(400).json({ error: 'Invalid student' });
 		}
-
-		// const e = await Enrollment.findOne({
-		// 	where: { student_id: student.id, plan_id: plan.id },
-		// });
-
-		// if (e) {
-		// 	return res
-		// 		.status(400)
-		// 		.json({ error: 'The student already has this plan' });
-		// }
 
 		const end_date = await addMonths(parseISO(start_date), plan.duration);
 		const total_price = plan.price * plan.duration;

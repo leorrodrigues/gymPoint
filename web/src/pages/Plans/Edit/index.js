@@ -29,19 +29,12 @@ const schema = Yup.object().shape({
 		.required('monthly price is required'),
 });
 
-export default function PlansNew() {
-	const [title, setTitle] = useState('Example Plan');
-	const [duration, setDuration] = useState(1);
-	const [price, setPrice] = useState(10);
-	const [total, setTotal] = useState(0);
+export default function PlansEdit() {
+	const [plan, setPlan] = useState();
+
+	// const [total, setTotal] = useState(0);
 
 	const { id } = useParams();
-
-	useEffect(() => {
-		const d = duration || 0;
-		const p = price || 0;
-		setTotal(d * p);
-	}, [duration, price]);
 
 	async function loadPlan() {
 		try {
@@ -49,9 +42,7 @@ export default function PlansNew() {
 				params: { id },
 			});
 
-			setTitle(data.title);
-			setDuration(data.duration);
-			setPrice(data.price);
+			setPlan({ ...data, total: data.duration * data.price });
 		} catch (e) {
 			toast.error('Error in load plan data');
 		}
@@ -72,16 +63,42 @@ export default function PlansNew() {
 		}
 	}
 
-	function handleTitleChange(text) {
-		setTitle(text.target.value);
-	}
-
 	function handleDurationChange(text) {
-		setDuration(parseInt(text.target.value, 10));
+		const value = parseInt(text.target.value, 10);
+
+		// eslint-disable-next-line no-restricted-globals
+		if (isNaN(value)) {
+			setPlan({
+				...plan,
+				duration: 0,
+				total: 0,
+			});
+		} else {
+			setPlan({
+				...plan,
+				duration: value,
+				total: value * plan.price,
+			});
+		}
 	}
 
 	function handlePriceChange(text) {
-		setPrice(text.target.value);
+		const { value } = text.target;
+
+		// eslint-disable-next-line no-restricted-globals
+		if (isNaN(value)) {
+			setPlan({
+				...plan,
+				price: 0,
+				total: 0,
+			});
+		} else {
+			setPlan({
+				...plan,
+				price: value,
+				total: value * plan.duration,
+			});
+		}
 	}
 
 	return (
@@ -89,29 +106,24 @@ export default function PlansNew() {
 			<TopItems>
 				<strong>Plans Edition</strong>
 				<div>
-					<ReturnButton>
-						<button
-							type="button"
-							onClick={() => history.push('/plans/')}>
-							BACK
-						</button>
+					<ReturnButton
+						type="button"
+						onClick={() => history.push('/plans/')}>
+						BACK
 					</ReturnButton>
-					<SaveButton>
-						<button type="submit" form="Form">
-							UPDATE
-						</button>
+					<SaveButton type="submit" form="Form">
+						UPDATE
 					</SaveButton>
 				</div>
 			</TopItems>
-			<RegistryForm id="Form" schema={schema} onSubmit={updatePlan}>
+			<RegistryForm
+				id="Form"
+				schema={schema}
+				onSubmit={updatePlan}
+				initialData={plan}>
 				<label htmlFor="title">
 					TITLE
-					<Input
-						name="title"
-						placeholder="Example"
-						value={title}
-						onChange={handleTitleChange}
-					/>
+					<Input name="title" placeholder="Example" />
 				</label>
 				<div>
 					<label htmlFor="duration">
@@ -119,7 +131,6 @@ export default function PlansNew() {
 						<Input
 							name="duration"
 							placeholder="0 month"
-							value={duration}
 							onChange={handleDurationChange}
 						/>
 					</label>
@@ -130,18 +141,13 @@ export default function PlansNew() {
 							name="price"
 							type="number"
 							placeholder="$0.00"
-							value={price}
 							onChange={handlePriceChange}
 						/>
 					</label>
 
-					<label htmlFor="Total">
-						Total Price
-						<Input
-							name="Total"
-							disabled
-							value={`$${Number(total).toFixed(2)}`}
-						/>
+					<label htmlFor="total">
+						TOTAL PRICE
+						<Input name="total" disabled placeholder="$0.00" />
 					</label>
 				</div>
 			</RegistryForm>

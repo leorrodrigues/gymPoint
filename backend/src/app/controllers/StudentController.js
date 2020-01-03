@@ -23,8 +23,8 @@ class StudentController {
 			where: {
 				name: { [Op.like]: `%${req.query.name}%` },
 			},
-			limit: 10,
-			offset: (page - 1) * 10,
+			limit: per_page,
+			offset: (page - 1) * per_page,
 			order: ['name'],
 		});
 		return res.json(students);

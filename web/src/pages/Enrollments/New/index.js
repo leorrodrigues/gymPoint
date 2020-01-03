@@ -26,20 +26,15 @@ const schema = Yup.object().shape({
 export default function EnrollmentsNew() {
 	const [plans, setPlans] = useState([]);
 	const [students, setStudents] = useState([]);
+	const [enrollment, setEnrollment] = useState({ plan: '', start_date: '' });
 
-	const [plan, setPlan] = useState();
-	// const [student, setStudent] = useState();
-	const [total, setTotal] = useState(0);
-	const [startDate, setStartDate] = useState();
-	const [endDate, setEndDate] = useState();
-
-	async function loadPlan() {
+	async function loadPlans() {
 		try {
 			const { data } = await api.get('plans');
 
 			setPlans(data);
 		} catch (e) {
-			toast.error('Error in load plan data');
+			toast.error('Error in load plans data');
 		}
 	}
 
@@ -54,24 +49,14 @@ export default function EnrollmentsNew() {
 
 			setStudents(data);
 		} catch (e) {
-			toast.error('Error in load plan data');
+			toast.error('Error in load students data');
 		}
 	}
 
 	useEffect(() => {
-		loadPlan();
+		loadPlans();
 		loadStudents();
 	}, []);
-
-	useEffect(() => {
-		if (plan) {
-			const d = plan.duration || 0;
-			const p = plan.price || 0;
-			setTotal(d * p);
-		} else {
-			setTotal(0);
-		}
-	}, [plan]);
 
 	// eslint-disable-next-line no-shadow
 	async function insertEnrollment({ student, plan, start_date }) {
@@ -88,61 +73,58 @@ export default function EnrollmentsNew() {
 		}
 	}
 
-	// function handleStudentChange(selection) {
-	// 	const student_id = Number(selection.target.value);
-	// 	const students_selected = students.find(x => x.id === student_id);
-	// 	// setStudent(students_selected);
-	// }
-
 	function handlePlanChange(selection) {
 		const plan_id = Number(selection.target.value);
 		const plan_selected = plans.find(x => x.id === plan_id);
-		setPlan(plan_selected);
+		setEnrollment({ ...enrollment, plan: plan_selected });
+	}
+
+	function handleDateChange(element) {
+		setEnrollment({
+			...enrollment,
+			start_date: new Date(element.target.value),
+		});
 	}
 
 	useEffect(() => {
-		if (plan && startDate) {
-			const eDate = format(
-				addMonths(new Date(startDate), plan.duration),
-				"yyyy'-'MM'-'dd"
-			);
-
-			setEndDate(eDate);
+		if (enrollment.plan && enrollment.start_date) {
+			setEnrollment({
+				...enrollment,
+				end_date: format(
+					addMonths(enrollment.start_date, enrollment.plan.duration),
+					"yyyy'-'MM'-'dd"
+				),
+				total: enrollment.plan.duration * enrollment.plan.price,
+			});
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [plan, startDate]);
-
-	function handleDateChange(element) {
-		const date = element.target.value;
-		setStartDate(date);
-	}
+	}, [enrollment.plan, enrollment.start_date]);
 
 	return (
 		<Container>
 			<TopItems>
 				<strong>Enrollments Registry</strong>
 				<div>
-					<ReturnButton>
-						<button
-							type="button"
-							onClick={() => history.push('/enrollments/')}>
-							BACK
-						</button>
+					<ReturnButton
+						type="button"
+						onClick={() => history.push('/enrollments/')}>
+						BACK
 					</ReturnButton>
-					<SaveButton>
-						<button type="submit" form="Form">
-							SAVE
-						</button>
+					<SaveButton type="submit" form="Form">
+						SAVE
 					</SaveButton>
 				</div>
 			</TopItems>
-			<RegistryForm id="Form" schema={schema} onSubmit={insertEnrollment}>
+			<RegistryForm
+				id="Form"
+				schema={schema}
+				onSubmit={insertEnrollment}
+				initialData={enrollment}>
 				<label htmlFor="student">
 					STUDENT
 					<Select
 						name="student"
 						options={students}
-						// onChange={handleStudentChange}
 						placeholder="Select the student"
 					/>
 				</label>
@@ -168,22 +150,12 @@ export default function EnrollmentsNew() {
 					</label>
 					<label htmlFor="end_date">
 						END DATE
-						<Input
-							name="end_date"
-							type="date"
-							value={endDate}
-							// onChange={handleStartDateChange}
-							disabled
-						/>
+						<Input name="end_date" type="date" disabled />
 					</label>
 
 					<label htmlFor="total">
 						Total Price
-						<Input
-							name="total"
-							disabled
-							value={`$${Number(total).toFixed(2)}`}
-						/>
+						<Input name="total" disabled placeholder="$0" />
 					</label>
 				</div>
 			</RegistryForm>

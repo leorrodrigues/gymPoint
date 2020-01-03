@@ -50,17 +50,13 @@ export default function StudentsNew() {
 			<TopItems>
 				<strong>Students Registry</strong>
 				<div>
-					<ReturnButton>
-						<button
-							type="button"
-							onClick={() => history.push('/students/')}>
-							BACK
-						</button>
+					<ReturnButton
+						type="button"
+						onClick={() => history.push('/students/')}>
+						BACK
 					</ReturnButton>
-					<SaveButton>
-						<button type="submit" form="Form">
-							SAVE
-						</button>
+					<SaveButton type="submit" form="Form">
+						SAVE
 					</SaveButton>
 				</div>
 			</TopItems>

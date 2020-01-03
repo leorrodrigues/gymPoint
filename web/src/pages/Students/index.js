@@ -11,6 +11,8 @@ import {
 	EmptyList,
 	EditButton,
 	DeleteButton,
+	Paginate,
+	PaginateButton,
 } from './styles';
 
 const headerTableItems = ['NAME', 'E-MAIL', 'AGE', '', ''];
@@ -18,19 +20,30 @@ const headerTableItems = ['NAME', 'E-MAIL', 'AGE', '', ''];
 export default function Students() {
 	const [studentName, setStudentName] = useState('');
 	const [students, setStudents] = useState([]);
+	const [currentPage, setCurrentPage] = useState(1);
+
+	const perPage = 10;
 
 	async function loadStudents() {
-		const { data } = await api.get('students', {
-			params: { name: studentName },
-		});
+		try {
+			const { data } = await api.get('students', {
+				params: {
+					name: studentName,
+					page: currentPage,
+					per_page: perPage,
+				},
+			});
 
-		setStudents(data);
+			setStudents(data);
+		} catch (e) {
+			toast.error('Error in load students data');
+		}
 	}
 
 	useEffect(() => {
 		loadStudents();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [studentName]);
+	}, [studentName, currentPage, perPage]);
 
 	function handleStudentNameChange(text) {
 		setStudentName(text.target.value);
@@ -63,25 +76,21 @@ export default function Students() {
 				<tr key={id}>
 					<td>{name}</td>
 					<td>{email}</td>
-					<td>{age}</td>
+					<td>{age} years</td>
 					<td>
-						<EditButton>
-							<button
-								type="button"
-								onClick={() =>
-									history.push(`/students/${student.id}/edit`)
-								}>
-								Edit
-							</button>
+						<EditButton
+							type="button"
+							onClick={() =>
+								history.push(`/students/${student.id}/edit`)
+							}>
+							Edit
 						</EditButton>
 					</td>
 					<td>
-						<DeleteButton>
-							<button
-								type="button"
-								onClick={() => handleDeleteStudent(student)}>
-								Delete
-							</button>
+						<DeleteButton
+							type="button"
+							onClick={() => handleDeleteStudent(student)}>
+							Delete
 						</DeleteButton>
 					</td>
 				</tr>
@@ -123,6 +132,21 @@ export default function Students() {
 					<strong>The gym has no students</strong>
 				</EmptyList>
 			)}
+			<Paginate>
+				<PaginateButton
+					page={currentPage}
+					onClick={() => setCurrentPage(currentPage - 1)}
+					type="prev">
+					Previus
+				</PaginateButton>
+				{currentPage}
+				<PaginateButton
+					onClick={() => setCurrentPage(currentPage + 1)}
+					end={String(students.length < perPage)}
+					type="next">
+					Next
+				</PaginateButton>
+			</Paginate>
 		</Container>
 	);
 }

@@ -17,8 +17,6 @@ import EnrollmentsNew from '~/pages/Enrollments/New';
 import EnrollmentsEdit from '~/pages/Enrollments/Edit';
 
 import HelpOrders from '~/pages/HelpOrders';
-import HelpOrdersNew from '~/pages/HelpOrders/New';
-import HelpOrdersEdit from '~/pages/HelpOrders/Edit';
 
 export default function Routes() {
 	return (
@@ -88,20 +86,6 @@ export default function Routes() {
 			<Route
 				path="/help-orders"
 				component={HelpOrders}
-				isPrivate
-				navItem="ASSISTANCE REQUESTS"
-				exact
-			/>
-			<Route
-				path="/help-orders/new"
-				component={HelpOrdersNew}
-				isPrivate
-				navItem="ASSISTANCE REQUESTS"
-				exact
-			/>
-			<Route
-				path="/help-orders/:id/edit"
-				component={HelpOrdersEdit}
 				isPrivate
 				navItem="ASSISTANCE REQUESTS"
 				exact

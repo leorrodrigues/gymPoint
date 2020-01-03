@@ -33,39 +33,35 @@ export const TopItems = styled.div`
 	}
 `;
 
-export const ReturnButton = styled.div`
-	padding: 15px;
-	button {
-		color: #fff;
-		font-weight: bold;
+export const ReturnButton = styled.button`
+	color: #fff;
+	font-weight: bold;
 
-		background: #cccccc;
-		width: 142px;
-		height: 36px;
-		border: 0;
-		border-radius: 4px;
+	background: #cccccc;
+	width: 142px;
+	height: 36px;
+	border: 0;
+	border-radius: 4px;
 
-		&:hover {
-			color: ${darken(0.3, '#CCCCCC')};
-		}
+	&:hover {
+		color: ${darken(0.3, '#CCCCCC')};
 	}
 `;
 
-export const SaveButton = styled.div`
-	padding: 15px;
-	button {
-		color: #fff;
-		font-weight: bold;
+export const SaveButton = styled.button`
+	margin-left: 20px;
 
-		background: #ee4d64;
-		width: 142px;
-		height: 36px;
-		border: 0;
-		border-radius: 4px;
+	color: #fff;
+	font-weight: bold;
 
-		&:hover {
-			color: ${darken(0.3, '#ee4d64')};
-		}
+	background: #ee4d64;
+	width: 142px;
+	height: 36px;
+	border: 0;
+	border-radius: 4px;
+
+	&:hover {
+		color: ${darken(0.3, '#ee4d64')};
 	}
 `;
 

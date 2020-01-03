@@ -61,17 +61,13 @@ export default function PlansNew() {
 			<TopItems>
 				<strong>Plans Registry</strong>
 				<div>
-					<ReturnButton>
-						<button
-							type="button"
-							onClick={() => history.push('/plans/')}>
-							BACK
-						</button>
+					<ReturnButton
+						type="button"
+						onClick={() => history.push('/plans/')}>
+						BACK
 					</ReturnButton>
-					<SaveButton>
-						<button type="submit" form="Form">
-							SAVE
-						</button>
+					<SaveButton type="submit" form="Form">
+						SAVE
 					</SaveButton>
 				</div>
 			</TopItems>

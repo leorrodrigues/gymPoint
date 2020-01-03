@@ -12,6 +12,8 @@ import {
 	EmptyList,
 	AnswerButton,
 	AnswerModal,
+	Paginate,
+	PaginateButton,
 } from './styles';
 
 const headerTableItems = ['STUDENT', 'QUESTION PREVIEW', ''];
@@ -25,16 +27,17 @@ export default function Students() {
 	const [students, setStudents] = useState([]);
 	const [show, setShow] = useState(false);
 	const [selectedOrder, setSelectedOrder] = useState();
+	const [currentPage, setCurrentPage] = useState(1);
+
+	const perPage = 10;
 
 	async function loadHelpOrders() {
 		try {
-			const { data } = await api.get('help-orders');
-
-			const filteredData = data.filter(order => {
-				return !order.answer;
+			const { data } = await api.get('help-orders/open', {
+				params: { page: currentPage, per_page: perPage },
 			});
 
-			setHelpOrders(filteredData);
+			setHelpOrders(data);
 		} catch (e) {
 			toast.error('Error in load help orders');
 		}
@@ -45,12 +48,16 @@ export default function Students() {
 			const { data } = await api.get('students');
 			setStudents(data);
 		} catch (e) {
-			toast.error('Error in load plan data');
+			toast.error('Error in load students data');
 		}
 	}
 
 	useEffect(() => {
 		loadHelpOrders();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentPage, perPage]);
+
+	useEffect(() => {
 		loadStudents();
 	}, []);
 
@@ -71,15 +78,13 @@ export default function Students() {
 					<td>{student && student.name}</td>
 					<td>{order.question}</td>
 					<td>
-						<AnswerButton>
-							<button
-								type="button"
-								onClick={() => {
-									setSelectedOrder(order);
-									setShow(true);
-								}}>
-								Answer
-							</button>
+						<AnswerButton
+							type="button"
+							onClick={() => {
+								setSelectedOrder(order);
+								setShow(true);
+							}}>
+							Answer
 						</AnswerButton>
 					</td>
 				</tr>
@@ -122,6 +127,21 @@ export default function Students() {
 					<strong>The gym has no assistance requests</strong>
 				</EmptyList>
 			)}
+			<Paginate>
+				<PaginateButton
+					page={currentPage}
+					onClick={() => setCurrentPage(currentPage - 1)}
+					type="prev">
+					Previus
+				</PaginateButton>
+				{currentPage}
+				<PaginateButton
+					onClick={() => setCurrentPage(currentPage + 1)}
+					end={String(helpOrders.length < perPage)}
+					type="next">
+					Next
+				</PaginateButton>
+			</Paginate>
 			<AnswerModal
 				isOpen={show}
 				onRequestClose={() => setShow(false)}

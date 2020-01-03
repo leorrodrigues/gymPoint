@@ -35,12 +35,8 @@ const schema = Yup.object().shape({
 		.required('height is required'),
 });
 
-export default function StudentsNew() {
-	const [name, setName] = useState('John Doe');
-	const [email, setEmail] = useState('example@email.com');
-	const [age, setAge] = useState('18');
-	const [weight, setWeight] = useState('70');
-	const [height, setHeight] = useState('1.80');
+export default function StudentsEdit() {
+	const [student, setStudent] = useState();
 
 	const { id } = useParams();
 
@@ -50,11 +46,7 @@ export default function StudentsNew() {
 				params: { id },
 			});
 
-			setName(data.name);
-			setEmail(data.email);
-			setAge(data.age);
-			setWeight(data.weight);
-			setHeight(data.height);
+			setStudent(data);
 		} catch (e) {
 			toast.error('Error in load student data');
 		}
@@ -75,89 +67,48 @@ export default function StudentsNew() {
 		}
 	}
 
-	function handleNameChange(text) {
-		setName(text.target.value);
-	}
-
-	function handleEmailChange(text) {
-		setEmail(text.target.value);
-	}
-
-	function handleAgeChange(text) {
-		setAge(text.target.value);
-	}
-
-	function handleWeightChange(text) {
-		setWeight(text.target.value);
-	}
-
-	function handleHeightChange(text) {
-		setHeight(text.target.value);
-	}
-
 	return (
 		<Container>
 			<TopItems>
 				<strong>Students Edition</strong>
 				<div>
-					<ReturnButton>
-						<button
-							type="button"
-							onClick={() => history.push('/students/')}>
-							BACK
-						</button>
+					<ReturnButton
+						type="button"
+						onClick={() => history.push('/students/')}>
+						BACK
 					</ReturnButton>
-					<SaveButton>
-						<button type="submit" form="Form">
-							UPDATE
-						</button>
+					<SaveButton type="submit" form="Form">
+						UPDATE
 					</SaveButton>
 				</div>
 			</TopItems>
-			<RegistryForm id="Form" schema={schema} onSubmit={insertStudent}>
+			<RegistryForm
+				id="Form"
+				schema={schema}
+				onSubmit={insertStudent}
+				initialData={student}>
 				<label htmlFor="name">
 					COMPLETE NAME
-					<Input
-						name="name"
-						value={name}
-						onChange={handleNameChange}
-					/>
+					<Input name="name" />
 				</label>
 				<label htmlFor="email">
 					E-MAIL ADDRESS
-					<Input
-						name="email"
-						type="email"
-						value={email}
-						onChange={handleEmailChange}
-					/>
+					<Input name="email" type="email" />
 				</label>
 				<div>
 					<label htmlFor="age">
 						AGE
-						<Input
-							name="age"
-							value={age}
-							onChange={handleAgeChange}
-						/>
+						<Input name="age" />
 					</label>
 
 					<label htmlFor="weight">
 						WEIGHT (Kg)
-						<Input
-							name="weight"
-							value={weight}
-							onChange={handleWeightChange}
-						/>
+						<Input name="weight" />
 					</label>
 
 					<label htmlFor="height">
 						Height (cm)
-						<Input
-							name="height"
-							value={height}
-							onChange={handleHeightChange}
-						/>
+						<Input name="height" />
 					</label>
 				</div>
 			</RegistryForm>

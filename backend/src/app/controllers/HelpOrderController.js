@@ -6,25 +6,31 @@ import Queue from '../../lib/Queue';
 import answerdQuestion from '../jobs/answerdQuestion';
 
 class CheckinController {
-	async indexAll(req, res) {
+	async indexAllOpen(req, res) {
 		const { page = 1, per_page = 10 } = req.query;
 
-		const orders = await HelpOrder.find({})
+		const orders = await HelpOrder.find({
+			answer: { $eq: null },
+		})
 			.limit(parseInt(per_page, 10))
 			.skip((parseInt(page, 10) - 1) * parseInt(per_page, 10));
 
 		return res.json(orders);
 	}
 
+	async indexAll(req, res) {
+		const orders = await HelpOrder.find({});
+
+		return res.json(orders);
+	}
+
 	async index(req, res) {
 		const { student_id } = req.params;
-		const { page = 1, per_page = 10 } = req.query;
 
 		const orders = await HelpOrder.find({
 			student_id,
-		})
-			.limit(parseInt(per_page, 10))
-			.skip((parseInt(page, 10) - 1) * parseInt(per_page, 10));
+		});
+
 		return res.json(orders);
 	}
 

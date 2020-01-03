@@ -11,23 +11,34 @@ import {
 	EmptyList,
 	EditButton,
 	DeleteButton,
+	Paginate,
+	PaginateButton,
 } from './styles';
 
 const headerTableItems = ['TITLE', 'DURATION', 'MONTHLY VALUE', '', ''];
 
 export default function Plans() {
 	const [plans, setPlans] = useState([]);
+	const [currentPage, setCurrentPage] = useState(1);
+
+	const perPage = 10;
 
 	async function loadPlans() {
-		const { data } = await api.get('plans');
+		try {
+			const { data } = await api.get('plans', {
+				params: { page: currentPage, per_page: perPage },
+			});
 
-		setPlans(data);
+			setPlans(data);
+		} catch (e) {
+			toast.error('Error in load plans data');
+		}
 	}
 
 	useEffect(() => {
 		loadPlans();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [currentPage, perPage]);
 
 	async function handleDeletePlan({ id, title }) {
 		// eslint-disable-next-line no-alert
@@ -62,23 +73,19 @@ export default function Plans() {
 					</td>
 					<td>{`$${price.toFixed(2)}`}</td>
 					<td>
-						<EditButton>
-							<button
-								type="button"
-								onClick={() =>
-									history.push(`/plans/${plan.id}/edit`)
-								}>
-								Edit
-							</button>
+						<EditButton
+							type="button"
+							onClick={() =>
+								history.push(`/plans/${plan.id}/edit`)
+							}>
+							Edit
 						</EditButton>
 					</td>
 					<td>
-						<DeleteButton>
-							<button
-								type="button"
-								onClick={() => handleDeletePlan(plan)}>
-								Delete
-							</button>
+						<DeleteButton
+							type="button"
+							onClick={() => handleDeletePlan(plan)}>
+							Delete
 						</DeleteButton>
 					</td>
 				</tr>
@@ -110,6 +117,21 @@ export default function Plans() {
 					<strong>The gym has no plans</strong>
 				</EmptyList>
 			)}
+			<Paginate>
+				<PaginateButton
+					page={currentPage}
+					onClick={() => setCurrentPage(currentPage - 1)}
+					type="prev">
+					Previus
+				</PaginateButton>
+				{currentPage}
+				<PaginateButton
+					onClick={() => setCurrentPage(currentPage + 1)}
+					end={String(plans.length < perPage)}
+					type="next">
+					Next
+				</PaginateButton>
+			</Paginate>
 		</Container>
 	);
 }

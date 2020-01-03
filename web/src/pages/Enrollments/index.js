@@ -13,6 +13,8 @@ import {
 	EmptyList,
 	EditButton,
 	DeleteButton,
+	Paginate,
+	PaginateButton,
 } from './styles';
 
 const headerTableItems = [
@@ -27,42 +29,36 @@ const headerTableItems = [
 
 export default function Enrollments() {
 	const [enrollments, setEnrollments] = useState([]);
-	const [students, setStudents] = useState([]);
-	const [plans, setPlans] = useState([]);
+	const [currentPage, setCurrentPage] = useState(1);
+
+	const perPage = 10;
 
 	async function loadEnrollments() {
-		const { data } = await api.get('enrollments');
-
-		setEnrollments(data);
-	}
-
-	async function loadStudents() {
-		const { data } = await api.get('students');
-
-		setStudents(data);
-	}
-
-	async function loadPlans() {
-		const { data } = await api.get('plans');
-
-		setPlans(data);
+		try {
+			const { data } = await api.get('enrollments', {
+				params: { page: currentPage, per_page: perPage },
+			});
+			setEnrollments(data);
+		} catch (e) {
+			toast.error('Error in load enrollments data');
+		}
 	}
 
 	useEffect(() => {
 		loadEnrollments();
-		loadStudents();
-		loadPlans();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [currentPage, perPage]);
 
-	async function handleDeleteEnrollment({ student_id, plan_id }) {
-		const student = students.find(x => x.id === student_id);
-
-		const plan = plans.find(x => x.id === plan_id);
+	async function handleDeleteEnrollment({
+		Student,
+		Plan,
+		student_id,
+		plan_id,
+	}) {
 		if (
 			// eslint-disable-next-line no-alert
 			window.confirm(
-				`Are you sure to delete the enrollment "${plan.title}" of user ${student.name} ? `
+				`Are you sure to delete the enrollment "${Plan.title}" of user ${Student.name} ? `
 			)
 		) {
 			try {
@@ -85,48 +81,40 @@ export default function Enrollments() {
 	function renderTableData() {
 		return enrollments.map(enrollment => {
 			const {
-				student_id,
-				plan_id,
 				start_date,
 				end_date,
 				active,
-			} = enrollment; // destructuring
-
-			const student = students.find(x => x.id === student_id);
-
-			const plan = plans.find(x => x.id === plan_id);
+				student_id,
+				plan_id,
+			} = enrollment;
+			const { name } = enrollment.Student;
+			const { title } = enrollment.Plan;
 
 			return (
 				<tr key={Math.random()}>
-					<td>{student ? student.name : ''}</td>
-					<td>{plan ? plan.title : ''}</td>
+					<td>{name}</td>
+					<td>{title}</td>
 					<td>
 						{format(parseISO(start_date), "MMMM, dd 'of' yyyy")}
 					</td>
 					<td>{format(parseISO(end_date), "MMMM, dd 'of' yyyy")}</td>
 					<td>{active ? 'Yes' : 'No'}</td>
 					<td>
-						<EditButton>
-							<button
-								type="button"
-								onClick={() =>
-									history.push(
-										`/enrollments/${student.id}/${plan.id}/edit`
-									)
-								}>
-								Edit
-							</button>
+						<EditButton
+							type="button"
+							onClick={() =>
+								history.push(
+									`/enrollments/${student_id}/${plan_id}/edit`
+								)
+							}>
+							Edit
 						</EditButton>
 					</td>
 					<td>
-						<DeleteButton>
-							<button
-								type="button"
-								onClick={() =>
-									handleDeleteEnrollment(enrollment)
-								}>
-								Delete
-							</button>
+						<DeleteButton
+							type="button"
+							onClick={() => handleDeleteEnrollment(enrollment)}>
+							Delete
 						</DeleteButton>
 					</td>
 				</tr>
@@ -158,6 +146,21 @@ export default function Enrollments() {
 					<strong>The gym has no enrollments</strong>
 				</EmptyList>
 			)}
+			<Paginate>
+				<PaginateButton
+					page={currentPage}
+					onClick={() => setCurrentPage(currentPage - 1)}
+					type="prev">
+					Previus
+				</PaginateButton>
+				{currentPage}
+				<PaginateButton
+					onClick={() => setCurrentPage(currentPage + 1)}
+					end={String(enrollments.length < perPage)}
+					type="next">
+					Next
+				</PaginateButton>
+			</Paginate>
 		</Container>
 	);
 }
